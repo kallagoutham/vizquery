@@ -19,11 +19,10 @@
 
 ## 🧠 Supported LLMs (via Together AI)
 
-- Meta-Llama 3.1 405B  
-- Meta-Llama 3.3 70B  
+- Meta Llama 3.3 70B Instruct Turbo Free  
+- Meta Llama 3.3 70B Instruct Turbo  
 - DeepSeek V3  
 - Qwen 2.5 7B  
-- Meta Llama 3.3 70B Instruct Turbo 
 
 ---
 
@@ -65,7 +64,21 @@ pip install -r requirements.txt
 - [Together AI API Key](https://api.together.ai/signin)  
 - [E2B API Key](https://e2b.dev/docs/legacy/getting-started/api-key)
 
-Enter the API keys in the app sidebar when prompted or via the .env file.
+Enter the API keys in the app sidebar when prompted, or set them before running:
+
+```bash
+export TOGETHER_API_KEY="your-together-api-key"
+export E2B_API_KEY="your-e2b-api-key"
+```
+
+Or create a local `.env` file:
+
+```bash
+TOGETHER_API_KEY=your-together-api-key
+E2B_API_KEY=your-e2b-api-key
+```
+
+The `.env` file is ignored by Git and should not be committed.
 
 ### 5. Run the Streamlit App
 
