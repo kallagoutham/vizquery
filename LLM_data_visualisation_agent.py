@@ -87,18 +87,41 @@ def upload_dataset(code_interpreter: Sandbox, uploaded_file) -> str:
         raise error
 
 
+def initialize_session_state() -> None:
+    default_state = {
+        'together_api_key': '',
+        'e2b_api_key': '',
+        'model_name': '',
+        'chat_history': [],
+    }
+
+    for key, value in default_state.items():
+        if key not in st.session_state:
+            st.session_state[key] = value
+
+
+def render_chat_history() -> None:
+    if not st.session_state.chat_history:
+        return
+
+    st.divider()
+    st.subheader("Chat History")
+
+    for index, chat in enumerate(reversed(st.session_state.chat_history), start=1):
+        history_number = len(st.session_state.chat_history) - index + 1
+        with st.expander(f"Question {history_number}: {chat['query']}", expanded=index == 1):
+            st.markdown("**Model**")
+            st.write(chat['model_label'])
+            st.markdown("**Response**")
+            st.write(chat['response'])
+
+
 def main():
     """Main Streamlit application."""
     st.title("📊 VizQuery")
     st.write("Upload your dataset and ask questions about it!")
 
-    # Initialize session state variables
-    if 'together_api_key' not in st.session_state:
-        st.session_state.together_api_key = ''
-    if 'e2b_api_key' not in st.session_state:
-        st.session_state.e2b_api_key = ''
-    if 'model_name' not in st.session_state:
-        st.session_state.model_name = ''
+    initialize_session_state()
 
     with st.sidebar:
         st.header("API Keys and Model Configuration")
@@ -122,7 +145,12 @@ def main():
             options=list(model_options.keys()),
             index=0  # Default to first option
         )
+        selected_model_label = st.session_state.model_name
         st.session_state.model_name = model_options[st.session_state.model_name]
+
+        if st.session_state.chat_history:
+            if st.button("Clear Chat History"):
+                st.session_state.chat_history = []
 
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     
@@ -150,6 +178,12 @@ def main():
                     
                     # Pass dataset_path to chat_with_llm
                     code_results, llm_response = chat_with_llm(code_interpreter, query, dataset_path)
+
+                    st.session_state.chat_history.append({
+                        "query": query,
+                        "response": llm_response,
+                        "model_label": selected_model_label,
+                    })
                     
                     # Display LLM's text response
                     st.write("AI Response:")
@@ -175,6 +209,8 @@ def main():
                                 st.dataframe(result)
                             else:
                                 st.write(result)  
+
+        render_chat_history()
 
 if __name__ == "__main__":
     main()
